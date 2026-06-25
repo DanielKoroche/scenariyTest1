@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Диагностика — Формула Миллиона</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d12;
+    --card: #16161e;
+    --card2: #1e1e28;
+    --border: rgba(255,255,255,0.07);
+    --gold: #c9a84c;
+    --gold-dim: rgba(201,168,76,0.15);
+    --gold-glow: rgba(201,168,76,0.08);
+    --text: #e8e8f0;
+    --muted: rgba(232,232,240,0.45);
+    --green: #4ade80;
+    --red: #f87171;
+    --orange: #fb923c;
+    --blue: #60a5fa;
+    --purple: #a78bfa;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 56px 24px 40px;
+    background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 70%);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .header-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  /* PROGRESS */
+  .progress-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 24px 0;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold) 0%, #e8c06b 100%);
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* QUESTION CARD */
+  .main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 28px 24px 80px;
+  }
+
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.35s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+  .q-text {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .q-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  /* OPTIONS */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--card2);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    position: relative;
+    user-select: none;
+  }
+  .opt:hover { border-color: rgba(201,168,76,0.3); background: rgba(201,168,76,0.04); }
+  .opt.selected {
+    border-color: var(--gold);
+    background: var(--gold-dim);
+  }
+  .opt-letter {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    transition: all 0.18s ease;
+    margin-top: 1px;
+  }
+  .opt.selected .opt-letter {
+    background: var(--gold);
+    color: #000;
+  }
+  .opt-text {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  /* NAV */
+  .nav {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  .btn {
+    padding: 12px 28px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s ease;
+    font-family: inherit;
+  }
+  .btn-back {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-back:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .btn-next {
+    background: var(--gold);
+    color: #000;
+  }
+  .btn-next:hover { background: #d9b555; transform: translateY(-1px); }
+  .btn-next:disabled { opacity: 0.35; pointer-events: none; }
+
+  /* SECTION DIVIDER */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 4px 0 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+    margin-top: 8px;
+  }
+
+  /* RESULT */
+  .result-screen { display: none; animation: fadeUp 0.5s ease both; }
+  .result-screen.visible { display: block; }
+
+  .result-hero {
+    background: linear-gradient(135deg, var(--card) 0%, var(--card2) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 32px;
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .result-scenario-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 99px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.3);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+  .result-icon { font-size: 48px; margin-bottom: 12px; line-height: 1; }
+  .result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.25;
+  }
+  .result-desc {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.65;
+  }
+
+  /* BLOCKS */
+  .block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .block-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .trait-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .trait-row:last-child { border-bottom: none; }
+  .trait-label { flex: 1; font-size: 13px; color: var(--muted); }
+  .trait-bar-wrap { flex: 2; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .trait-bar {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--gold);
+    transition: width 1s cubic-bezier(0.4,0,0.2,1) 0.3s;
+  }
+  .trait-value { font-size: 12px; font-weight: 600; color: var(--gold); width: 28px; text-align: right; }
+
+  /* SCENARIO METER */
+  .scenario-grid { display: flex; flex-direction: column; gap: 10px; }
+  .scenario-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 36px;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--card2);
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+  .scenario-row.primary {
+    border-color: rgba(201,168,76,0.4);
+    background: var(--gold-glow);
+  }
+  .scenario-row.secondary { border-color: rgba(255,255,255,0.1); }
+  .s-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .s-bar-wrap { height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .s-bar { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(0.4,0,0.2,1) 0.5s; }
+  .s-bar.gold { background: var(--gold); }
+  .s-bar.dim { background: rgba(232,232,240,0.2); }
+  .s-pct { font-size: 12px; font-weight: 600; color: var(--muted); text-align: right; }
+  .scenario-row.primary .s-pct { color: var(--gold); }
+
+  /* PILLS */
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .pill.warn { border-color: rgba(248,113,113,0.3); color: var(--red); background: rgba(248,113,113,0.06); }
+  .pill.ok { border-color: rgba(74,222,128,0.3); color: var(--green); background: rgba(74,222,128,0.06); }
+  .pill.info { border-color: rgba(96,165,250,0.3); color: var(--blue); background: rgba(96,165,250,0.06); }
+
+  /* ACTION LIST */
+  .action-list { display: flex; flex-direction: column; gap: 10px; }
+  .action-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    background: var(--card2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .action-num {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--gold);
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+  .action-text { font-size: 13px; line-height: 1.55; color: var(--text); }
+  .action-text strong { color: var(--gold); font-weight: 600; }
+
+  /* QUOTE */
+  .quote-block {
+    border-left: 3px solid var(--gold);
+    padding: 16px 20px;
+    background: var(--gold-glow);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--muted);
+    line-height: 1.65;
+    margin-top: 8px;
+  }
+
+  .btn-restart {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: inherit;
+    margin-top: 8px;
+  }
+  .btn-restart:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+  .hidden { display: none; }
+
+  @media (max-width: 500px) {
+    .question-card { padding: 22px 18px; }
+    .result-hero { padding: 28px 20px; }
+    .block { padding: 20px 18px; }
+    .scenario-row { grid-template-columns: 120px 1fr 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">Формула Миллиона · Михаил Кимочка</div>
+  <h1>Диагностика<br>сценария и типа</h1>
+  <p>14 ситуативных вопросов — честный анализ твоего сценария, точек роста и первых шагов</p>
+</div>
+
+<div class="progress-wrap" id="progressWrap">
+  <div class="progress-meta">
+    <span id="progressLabel">Вопрос 1 из 14</span>
+    <span id="progressPct">0%</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div class="main">
+  <div id="quizScreen">
+    <!-- Questions rendered by JS -->
+  </div>
+
+  <div class="result-screen" id="resultScreen">
+    <!-- Result rendered by JS -->
+  </div>
+</div>
+
+<script>
+const questions = [
+  // БЛОК 1: МОТИВАЦИЯ И ДВИЖУЩАЯ СИЛА
+  {
+    block: "Мотивация",
+    text: "Ты только что получил оплату от клиента. Что происходит дальше?",
+    sub: "Выбери то, что максимально похоже на твою реальную реакцию.",
+    opts: [
+      { text: "Выдыхаю — слава богу, закрыл долг/аренду. Теперь можно расслабиться.", tags: ["scenario_4"] },
+      { text: "Хорошо, но теперь думаю: как сделать так, чтобы такие оплаты приходили каждый месяц без паники?", tags: ["scenario_1"] },
+      { text: "Кайф от суммы, но дальше всё равно делаю то, что нравится, а не то, что принесёт больше.", tags: ["scenario_2"] },
+      { text: "Радуюсь, но тут же начинаю думать, что если клиент уйдёт — будет проблема.", tags: ["scenario_4","scenario_3"] },
+    ]
+  },
+  {
+    block: "Мотивация",
+    text: "Когда ты последний раз по-настоящему горел каким-то проектом?",
+    sub: "Выбери ближайшее.",
+    opts: [
+      { text: "Прямо сейчас — у меня есть цель и я иду к ней.", tags: ["scenario_1"] },
+      { text: "Когда был классный творческий задачa: интересная съёмка, новый формат, что-то необычное.", tags: ["scenario_2"] },
+      { text: "Когда придумал новую идею бизнеса / направления, но до результата не дошло.", tags: ["scenario_5","scenario_2"] },
+      { text: "Когда был прижат к стенке и надо было срочно решить проблему.", tags: ["scenario_4"] },
+    ]
+  },
+
+  // БЛОК 2: ОТНОШЕНИЕ К ЦЕЛЯМ
+  {
+    block: "Цели",
+    text: "Есть конкретная цифра — сколько ты хочешь зарабатывать через год. Что ты чувствуешь прямо сейчас, думая об этом?",
+    sub: null,
+    opts: [
+      { text: "Знаю цифру, знаю что нужно сделать, делаю.", tags: ["scenario_1"] },
+      { text: "Цифра есть, но не уверен что реально достижима — скорее всего придётся очень много работать.", tags: ["scenario_3","scenario_4"] },
+      { text: "Цифра есть, но сначала надо разобраться с ещё одним курсом / инструментом / нишей.", tags: ["scenario_5","scenario_6"] },
+      { text: "Честно? Цифры как таковой нет — я просто хочу делать хорошую работу и чтобы всё складывалось.", tags: ["scenario_2","scenario_6"] },
+    ]
+  },
+  {
+    block: "Цели",
+    text: "Ты поставил цель на 90 дней. Через неделю что происходит?",
+    sub: null,
+    opts: [
+      { text: "Ежедневно делаю что-то в сторону цели, трекаю прогресс.", tags: ["scenario_1"] },
+      { text: "Забыл — другие задачи и срочные дела затянули.", tags: ["scenario_4","scenario_8"] },
+      { text: "Занимаюсь, но больше процессом (изучаю, готовлю, планирую), чем конкретными шагами к цифре.", tags: ["scenario_2","scenario_5"] },
+      { text: "Начинаю делать, но первый же отказ или трудность сильно тормозит.", tags: ["scenario_6","scenario_3"] },
+    ]
+  },
+
+  // БЛОК 3: ДЕЙСТВИЯ И ПАТТЕРНЫ
+  {
+    block: "Действия",
+    text: "Есть хорошая идея для нового продукта или направления. Что происходит?",
+    sub: null,
+    opts: [
+      { text: "Тестирую быстро: первый клиент или отказ в течение недели.", tags: ["scenario_1"] },
+      { text: "Долго обдумываю, обсуждаю с людьми, ищу информацию — но запуск откладывается.", tags: ["scenario_2","scenario_5"] },
+      { text: "Загораюсь, начинаю готовить — но вскоре появляется другая идея интереснее.", tags: ["scenario_5"] },
+      { text: "Понимаю что идея хорошая, но думаю: рынок занят, у меня нет ресурсов, не время.", tags: ["scenario_6","scenario_8"] },
+    ]
+  },
+  {
+    block: "Действия",
+    text: "Ты сделал рилс / видео / оффер. Он не получил результата. Что дальше?",
+    sub: null,
+    opts: [
+      { text: "Анализирую что не сработало (тема, хук, монтаж, оффер) и делаю другой.", tags: ["scenario_1"] },
+      { text: "Обидно. Думаю что, наверное, это не моё или ниша не та.", tags: ["scenario_6","scenario_5"] },
+      { text: "Делаю ещё несколько таких же — вдруг зайдёт.", tags: ["scenario_8"] },
+      { text: "Нахожу кучу причин почему не сработало (конкуренты, алгоритм, время года).", tags: ["scenario_8","scenario_6"] },
+    ]
+  },
+  {
+    block: "Действия",
+    text: "Есть задача, которую ты должен сделать, но она некомфортная (холодный звонок, поднятие цены, неудобный разговор с клиентом). Что происходит?",
+    sub: null,
+    opts: [
+      { text: "Делаю — иногда через дискомфорт, но делаю.", tags: ["scenario_1"] },
+      { text: "Откладываю до последнего, пока не припрёт.", tags: ["scenario_4"] },
+      { text: "Нахожу альтернативу попроще и делаю её вместо этой.", tags: ["scenario_8","scenario_3"] },
+      { text: "Делаю минимально необходимое чтобы можно было сказать что попробовал.", tags: ["scenario_8"] },
+    ]
+  },
+
+  // БЛОК 4: ДЕНЬГИ И БИЗНЕС
+  {
+    block: "Деньги",
+    text: "Как выглядит твой доход последние 3 месяца?",
+    sub: null,
+    opts: [
+      { text: "Растёт или стабильный — есть система привлечения клиентов.", tags: ["scenario_1"] },
+      { text: "Скачет: то много, то мало — зависит от обстоятельств.", tags: ["scenario_4","scenario_2"] },
+      { text: "Мало — но я пока инвестирую в развитие / учусь / готовлюсь.", tags: ["scenario_5","scenario_6"] },
+      { text: "Стабильный, но рост непонятно как сделать.", tags: ["scenario_2","scenario_3"] },
+    ]
+  },
+  {
+    block: "Деньги",
+    text: "Сколько ты зарабатываешь в месяц — и сколько ХОЧЕШЬ зарабатывать? Как ты относишься к этому разрыву?",
+    sub: null,
+    opts: [
+      { text: "Вижу конкретный путь как сократить разрыв и работаю над этим.", tags: ["scenario_1"] },
+      { text: "Разрыв большой, но я верю что постепенно придёт — главное делать хорошую работу.", tags: ["scenario_2","scenario_6"] },
+      { text: "Разрыв пугает. Кажется что для такого дохода надо стать другим человеком.", tags: ["scenario_3","scenario_6"] },
+      { text: "Особо не задумываюсь — работаю на что есть, получается что получается.", tags: ["scenario_5","scenario_2"] },
+    ]
+  },
+
+  // БЛОК 5: СТРАХИ И БАРЬЕРЫ
+  {
+    block: "Страхи",
+    text: "Тебе предлагают выступить перед 50 потенциальными клиентами. Твоя реакция?",
+    sub: null,
+    opts: [
+      { text: "С удовольствием — это хорошая возможность.", tags: ["scenario_1"] },
+      { text: "Соглашусь, но буду очень нервничать и долго готовиться.", tags: ["scenario_3","scenario_6"] },
+      { text: "Откажусь — не моё, я не публичный человек.", tags: ["scenario_6","scenario_8"] },
+      { text: "Соглашусь, начну готовить, но найду причину не пойти в последний момент.", tags: ["scenario_3","scenario_8"] },
+    ]
+  },
+  {
+    block: "Страхи",
+    text: "Что тебя РЕАЛЬНО останавливает от следующего шага прямо сейчас?",
+    sub: "Выбери честно.",
+    opts: [
+      { text: "Ничего — я двигаюсь. Есть вопросы, но не блокирующие.", tags: ["scenario_1"] },
+      { text: "Неуверенность: вдруг я не такой хороший / достаточно опытный / интересный.", tags: ["scenario_6","scenario_3"] },
+      { text: "Время и ресурсы — слишком много всего, не знаю за что взяться.", tags: ["scenario_2","scenario_5"] },
+      { text: "Неизвестность: а вдруг не сработает? Лучше подготовиться ещё.", tags: ["scenario_3","scenario_5"] },
+    ]
+  },
+
+  // БЛОК 6: ФОКУС И СИСТЕМА
+  {
+    block: "Система",
+    text: "Сколько активных направлений/проектов ты ведёшь прямо сейчас?",
+    sub: null,
+    opts: [
+      { text: "Одно главное — всё остальное второстепенное.", tags: ["scenario_1"] },
+      { text: "2–3 — пытаюсь совмещать.", tags: ["scenario_2","scenario_4"] },
+      { text: "4+ — и все кажутся важными.", tags: ["scenario_5","scenario_8"] },
+      { text: "Много идей в голове, а активных толком нет.", tags: ["scenario_5","scenario_6"] },
+    ]
+  },
+  {
+    block: "Система",
+    text: "Как выглядит твоя неделя?",
+    sub: null,
+    opts: [
+      { text: "Есть план на неделю, работаю по приоритетам.", tags: ["scenario_1"] },
+      { text: "Живу в режиме реакции: что горит — то и делаю.", tags: ["scenario_4"] },
+      { text: "Делаю то что нравится, остальное откладываю.", tags: ["scenario_2","scenario_8"] },
+      { text: "Каждую неделю обещаю себе начать правильно — и снова не выходит.", tags: ["scenario_5","scenario_6"] },
+    ]
+  },
+  {
+    block: "Система",
+    text: "Что ближе всего описывает тебя как предпринимателя прямо сейчас?",
+    sub: "Последний вопрос.",
+    opts: [
+      { text: "Иду к конкретной цели. Иногда сложно, но знаю зачем.", tags: ["scenario_1"] },
+      { text: "Делаю классную работу, но деньги как будто всегда немного недотягивают.", tags: ["scenario_2"] },
+      { text: "Много идей и энергии, но результат не соответствует усилиям.", tags: ["scenario_5","scenario_4"] },
+      { text: "Чувствую что хожу по кругу — вроде делаю, а роста нет.", tags: ["scenario_6","scenario_8"] },
+    ]
+  },
+];
+
+const SCENARIOS = {
+  scenario_1: { name: "Играть, чтобы выиграть", icon: "🏆", color: "#4ade80", desc: "Здоровый сценарий. Ты видишь цель и движешься к ней стратегически." },
+  scenario_2: { name: "Играть, чтобы играть", icon: "🎨", color: "#60a5fa", desc: "Кайф от процесса важнее результата. Творчество и общение — твоя стихия." },
+  scenario_3: { name: "Не выиграть", icon: "😰", color: "#a78bfa", desc: "Боишься последствий успеха больше, чем провала. Стартуешь, но не финишируешь." },
+  scenario_4: { name: "Жопник", icon: "🆘", color: "#fb923c", desc: "Живёшь от кризиса к кризису. Мотивация включается только когда припирает." },
+  scenario_5: { name: "Не играть, но хотеть", icon: "🎲", color: "#f472b6", desc: "Много идей и планов, но ответственность перекладывается на темп, обстоятельства или знания." },
+  scenario_6: { name: "Не играть", icon: "🚫", color: "#f87171", desc: "Запрещаешь себе хотеть или считаешь что это не для тебя." },
+  scenario_7: { name: "Проиграть", icon: "😢", color: "#94a3b8", desc: "Проигрыш в одном даёт выгоды в другом — поддержку, сочувствие, избегание ответственности." },
+  scenario_8: { name: "Галочник", icon: "🎭", color: "#64748b", desc: "Формально участвуешь, делаешь минимум, ищешь причины не делать." },
+};
+
+// Dani context — pre-loaded awareness
+const DANI_CONTEXT = {
+  hasBusinesses: true,
+  isStudent: true,
+  focusNeeded: true
+};
+
+let current = 0;
+let answers = []; // store selected opt index per question
+
+function init() {
+  renderQuestion(0);
+}
+
+function renderQuestion(idx) {
+  const q = questions[idx];
+  const screen = document.getElementById('quizScreen');
+  const letters = ['А','Б','В','Г'];
+
+  let blockLabel = '';
+  if (idx === 0 || questions[idx].block !== questions[idx-1]?.block) {
+    blockLabel = `<div class="section-label">${q.block}</div>`;
+  }
+
+  screen.innerHTML = `
+    ${blockLabel}
+    <div class="question-card">
+      <div class="q-number">Вопрос ${idx+1} из ${questions.length}</div>
+      <div class="q-text">${q.text}</div>
+      ${q.sub ? `<div class="q-sub">${q.sub}</div>` : ''}
+      <div class="options" id="opts">
+        ${q.opts.map((o,i) => `
+          <div class="opt ${answers[idx]===i?'selected':''}" onclick="selectOpt(${i})" data-i="${i}">
+            <div class="opt-letter">${letters[i]}</div>
+            <div class="opt-text">${o.text}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="nav">
+      ${idx > 0 ? `<button class="btn btn-back" onclick="goBack()">← Назад</button>` : ''}
+      <button class="btn btn-next" id="btnNext" onclick="goNext()" ${answers[idx]===undefined?'disabled':''}>
+        ${idx < questions.length-1 ? 'Далее →' : 'Получить результат'}
+      </button>
+    </div>
+  `;
+
+  updateProgress(idx);
+}
+
+function selectOpt(i) {
+  answers[current] = i;
+  document.querySelectorAll('.opt').forEach((el,idx) => {
+    el.classList.toggle('selected', idx===i);
+  });
+  document.getElementById('btnNext').disabled = false;
+}
+
+function goNext() {
+  if (answers[current] === undefined) return;
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion(current);
+    window.scrollTo({top:0, behavior:'smooth'});
+  } else {
+    showResult();
+  }
+}
+
+function goBack() {
+  if (current > 0) {
+    current--;
+    renderQuestion(current);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+}
+
+function updateProgress(idx) {
+  const pct = Math.round((idx / questions.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `Вопрос ${idx+1} из ${questions.length}`;
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+function computeScores() {
+  const scores = {};
+  Object.keys(SCENARIOS).forEach(k => scores[k] = 0);
+
+  answers.forEach((ansIdx, qIdx) => {
+    const tags = questions[qIdx].opts[ansIdx].tags;
+    tags.forEach(t => { scores[t] = (scores[t]||0) + 1; });
+  });
+
+  return scores;
+}
+
+function getTopScenarios(scores) {
+  return Object.entries(scores)
+    .sort((a,b) => b[1]-a[1])
+    .filter(([,v]) => v > 0)
+    .slice(0, 4);
+}
+
+function computeTraits(scores) {
+  const total = questions.length;
+  // derive trait scores from scenario weights
+  return {
+    "Стратегичность": Math.round((scores.scenario_1 / total) * 100),
+    "Системность": Math.round(Math.max(0, (scores.scenario_1 * 1.2 - scores.scenario_4 * 0.5) / total * 100)),
+    "Действие vs Подготовка": Math.round(Math.max(0, 100 - (scores.scenario_5 + scores.scenario_2) * 12)),
+    "Устойчивость к страху": Math.round(Math.max(0, 100 - (scores.scenario_6 + scores.scenario_3) * 14)),
+    "Фокус": Math.round(Math.max(0, 100 - (scores.scenario_5 + scores.scenario_8) * 12)),
+  };
+}
+
+function getPrimaryScenario(top) {
+  return top[0][0];
+}
+
+function getRecommendations(primary, scores) {
+  const recs = {
+    scenario_1: [
+      "Выбери <strong>одно главное направление</strong> в бизнесе на следующие 1–4 месяца и не распыляйся.",
+      "Составь 90-дневный план с конкретными измеримыми цифрами (клиенты, выручка).",
+      "Делегируй задачи, которые не требуют тебя лично.",
+      "Аудит окружения: убери источники, снижающие энергию ниже 7/10.",
+    ],
+    scenario_2: [
+      "<strong>Поставь измеримую цель на 90 дней</strong> — не «делать качественные рилсы», а «20 клиентов» или «300к выручки».",
+      "Ежедневно задавай себе вопрос: «Что я сделал СЕГОДНЯ, что приблизило меня к цели?»",
+      "Раздели свою работу на «творческое» и «коммерческое» — второе должно занимать минимум 30% времени.",
+      "Правило 72 часов: любая идея без первого действия за 72ч — удалить из списка.",
+    ],
+    scenario_3: [
+      "Выпиши конкретно: <strong>чего именно ты боишься после победы?</strong> Это и есть настоящий барьер.",
+      "Сделай один некомфортный шаг в ближайшие 24 часа — позвони клиенту, выложи рилс, назначь встречу.",
+      "Перестань готовиться к запуску — начни запуск и готовься параллельно.",
+      "Напомни себе: страх последствий успеха > страха провала. Это сценарий, а не факт.",
+    ],
+    scenario_4: [
+      "<strong>Создай финансовую подушку</strong> — 10% с каждого поступления, без исключений.",
+      "Планируй неделю в воскресенье — до того, как начались пожары.",
+      "Поставь одну цель из желания, а не из страха — и работай только над ней.",
+      "Заведи 'план минимум' на месяц чтобы не попадать в кризис каждый раз.",
+    ],
+    scenario_5: [
+      "<strong>Выбери ONE нишу/продукт/направление</strong> и дай себе обещание не менять 90 дней.",
+      "Правило 72 часов: идея не стала действием за 72ч — удаляешь.",
+      "Сделай первое конкретное действие по текущей идее в течение 24 часов после прочтения этого.",
+      "Разорви связь «готов» и «делаю» — ты никогда не будешь достаточно готов.",
+    ],
+    scenario_6: [
+      "Признай честно: «не хочу» = «боюсь». Запиши что именно страшит.",
+      "<strong>Напиши письмо от 60-летнего себя</strong>, который так и не попробовал — прочитай вслух.",
+      "Сделай самый маленький и безопасный шаг: не запуск, а один разговор с человеком, который это уже делает.",
+      "Разреши себе хотеть. Просто начни играть — не побеждать, а играть.",
+    ],
+    scenario_7: [
+      "Выпиши все сферы где ты «проигрываешь» + кому выгоден твой проигрыш в каждой.",
+      "Убери все выгоды от проигрыша — поддержку за счёт жалоб, избегание ответственности.",
+      "Честный разговор с собой: что ты реально хочешь и почему молчишь об этом.",
+    ],
+    scenario_8: [
+      "Задай себе вопрос: <strong>чем я сейчас занимаюсь просто потому что «надо»?</strong>",
+      "Выбери одно и скажи вслух: «Я не хочу в это играть. Я выхожу из этой игры.»",
+      "Начни делать то, что ты ДЕЙСТВИТЕЛЬНО хочешь — пусть даже маленький шаг.",
+    ],
+  };
+  return recs[primary] || recs.scenario_1;
+}
+
+function getIllusions(scores) {
+  const illusions = [];
+  if (scores.scenario_5 >= 2 || scores.scenario_6 >= 1) illusions.push({ text: "Вот-вот", type: "warn" });
+  if (scores.scenario_6 >= 2) illusions.push({ text: "Недостойного", type: "warn" });
+  if (scores.scenario_3 >= 2 || scores.scenario_5 >= 3) illusions.push({ text: "Проклятого", type: "warn" });
+  if (scores.scenario_6 >= 1 || scores.scenario_3 >= 1) illusions.push({ text: "Осуждения", type: "warn" });
+  if (scores.scenario_2 >= 2) illusions.push({ text: "Миллионов", type: "info" });
+  return illusions;
+}
+
+function getStrengths(scores) {
+  const s = [];
+  if (scores.scenario_1 >= 3) s.push({ text: "Стратегическое мышление", type: "ok" });
+  if (scores.scenario_2 >= 2) s.push({ text: "Творческий подход", type: "ok" });
+  if (scores.scenario_1 >= 2) s.push({ text: "Ориентация на результат", type: "ok" });
+  if (scores.scenario_4 <= 1 && scores.scenario_1 >= 1) s.push({ text: "Управляемый стресс", type: "ok" });
+  if (s.length === 0) s.push({ text: "Осознанность — ты уже видишь паттерны", type: "ok" });
+  return s;
+}
+
+function showResult() {
+  document.getElementById('progressWrap').classList.add('hidden');
+  const scores = computeScores();
+  const top = getTopScenarios(scores);
+  const primary = getPrimaryScenario(top);
+  const pScenario = SCENARIOS[primary];
+  const traits = computeTraits(scores);
+  const recs = getRecommendations(primary, scores);
+  const illusions = getIllusions(scores);
+  const strengths = getStrengths(scores);
+  const total = questions.length;
+
+  const scenarioRows = top.map(([key, val], i) => {
+    const s = SCENARIOS[key];
+    const pct = Math.round((val / (total * 0.7)) * 100);
+    const capped = Math.min(pct, 100);
+    return `
+      <div class="scenario-row ${i===0?'primary':'secondary'}">
+        <div class="s-name">${s.icon} ${s.name}</div>
+        <div class="s-bar-wrap"><div class="s-bar ${i===0?'gold':'dim'}" style="width:0%" data-w="${capped}"></div></div>
+        <div class="s-pct">${capped}%</div>
+      </div>
+    `;
+  }).join('');
+
+  const traitRows = Object.entries(traits).map(([label, val]) => `
+    <div class="trait-row">
+      <div class="trait-label">${label}</div>
+      <div class="trait-bar-wrap"><div class="trait-bar" style="width:0%" data-w="${val}"></div></div>
+      <div class="trait-value">${val}%</div>
+    </div>
+  `).join('');
+
+  const actionItems = recs.map((r,i) => `
+    <div class="action-item">
+      <div class="action-num">${i+1}</div>
+      <div class="action-text">${r}</div>
+    </div>
+  `).join('');
+
+  const illusionPills = illusions.map(il => `<span class="pill ${il.type}">${il.text}</span>`).join('');
+  const strengthPills = strengths.map(s => `<span class="pill ${s.type}">${s.text}</span>`).join('');
+
+  const resultHtml = `
+    <div class="result-hero">
+      <div class="result-scenario-badge">Основной сценарий</div>
+      <div class="result-icon">${pScenario.icon}</div>
+      <div class="result-title">${pScenario.name}</div>
+      <div class="result-desc">${pScenario.desc}</div>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Распределение сценариев</div>
+      <div class="scenario-grid">${scenarioRows}</div>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Профиль характеристик</div>
+      ${traitRows}
+    </div>
+
+    ${strengths.length ? `
+    <div class="block">
+      <div class="block-title">Сильные стороны</div>
+      <div class="pills">${strengthPills}</div>
+    </div>
+    ` : ''}
+
+    ${illusions.length ? `
+    <div class="block">
+      <div class="block-title">Активные иллюзии</div>
+      <div class="pills">${illusionPills}</div>
+      <div class="quote-block" style="margin-top:14px">
+        Иллюзии разбиваются только переходом в реальность — конкретным первым действием в реальном мире.
+      </div>
+    </div>
+    ` : ''}
+
+    <div class="block">
+      <div class="block-title">Твои первые шаги</div>
+      <div class="action-list">${actionItems}</div>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Ключевое</div>
+      <div class="quote-block">
+        Пока ты в своём сценарии — ты будешь использовать любые инструменты так, чтобы в нём остаться. Осознание сценария — это уже первый шаг к его изменению.<br><br>
+        За один период можно измениться только в чём-то <strong>одном</strong>. Выбери это одно прямо сейчас.
+      </div>
+    </div>
+
+    <button class="btn-restart" onclick="restart()">↺ Пройти заново</button>
+  `;
+
+  document.getElementById('quizScreen').classList.add('hidden');
+  const rs = document.getElementById('resultScreen');
+  rs.innerHTML = resultHtml;
+  rs.classList.add('visible');
+  window.scrollTo({top:0, behavior:'smooth'});
+
+  // Animate bars after render
+  setTimeout(() => {
+    document.querySelectorAll('.trait-bar[data-w], .s-bar[data-w]').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 100);
+}
+
+function restart() {
+  current = 0;
+  answers = [];
+  document.getElementById('progressWrap').classList.remove('hidden');
+  document.getElementById('resultScreen').classList.remove('visible');
+  document.getElementById('resultScreen').innerHTML = '';
+  document.getElementById('quizScreen').classList.remove('hidden');
+  renderQuestion(0);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+init();
+</script>
+</body>
+</html>
